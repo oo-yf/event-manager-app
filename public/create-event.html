@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Event</title>
+</head>
+<body>
+  <h1>Create a New Event</h1>
+
+  <form id="eventForm">
+    <label>Event Name:
+      <input type="text" id="eventName" required />
+    </label><br /><br />
+
+    <label>Date:
+      <input type="date" id="eventDate" required />
+    </label><br /><br />
+
+    <label>Location:
+      <input type="text" id="eventLocation" required />
+    </label><br /><br />
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+  document.getElementById("eventForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Prevent default page reload
+
+    // Grab form values
+    const name = document.getElementById("eventName").value;
+    const date = document.getElementById("eventDate").value;
+    const location = document.getElementById("eventLocation").value;
+
+    // Send form data to backend via POST request
+    fetch('/api/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, date, location })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Server response:", data);
+      alert("Event submitted and saved!");
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Failed to save event.");
+    });
+  });
+</script>
+
+<!-- Back to homepage button -->
+<br /><br />
+<a href="index.html">
+  <button>⬅️ Back to Home</button>
+</a>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event List</title>
+</head>
+<body>
+  <h1>All Events</h1>
+  <div id="eventContainer">
+    <!-- Events will be added here -->
+  </div>
+
+  <br /><br />
+  <a href="index.html">
+    <button>⬅️ Back to Home</button>
+  </a>
+
+  <script>
+    // Fetch events from the backend
+    fetch('/api/events')
+      .then(res => res.json())
+      .then(events => {
+        const container = document.getElementById("eventContainer");
+
+        if (events.length === 0) {
+          container.innerHTML = "<p>No events submitted yet.</p>";
+        } else {
+          events.forEach(event => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+              <strong>${event.name}</strong><br />
+              📅 ${event.date}<br />
+              📍 ${event.location}<br /><br />
+            `;
+            container.appendChild(div);
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load events:", err);
+      });
+  </script>
+</body>
+</html>
