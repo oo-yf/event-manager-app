@@ -1,44 +1,34 @@
-const mongoose = require('mongoose');
-
 // Import required modules
 const express = require('express');
+const mongoose = require('mongoose');
 const path = require('path');
+require('dotenv').config();
 
-// Replace with your actual MongoDB connection string
-mongoose.connect('mongodb+srv://oo:881206@cluster0.ya3ymba.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+// Initialize app
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Connect MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('✅ Connected to MongoDB Atlas'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Define a schema (like a database blueprint)
+// Schema and model
 const eventSchema = new mongoose.Schema({
   name: String,
   date: String,
   location: String
 });
-
-// Create a model based on the schema
 const Event = mongoose.model('Event', eventSchema);
 
-// Create an Express app
-const app = express();
-const PORT = 3000;
-
-// Serve static files from the "public" folder
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json()); // Allow server to read JSON data
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-});
-
-// Store events in memory (in this array)
-let events = [];
-
-// Handle POST requests to /api/events
+// POST route - save event
 app.post('/api/events', async (req, res) => {
   const { name, date, location } = req.body;
 
@@ -59,14 +49,17 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
-
-// GET all events
+// GET route - fetch all events
 app.get('/api/events', (req, res) => {
   Event.find()
-  .then((allEvents) => res.json(allEvents))
-  .catch((err) => {
-    console.error("Error fetching events:", err);
-    res.status(500).json({ error: 'Database fetch failed' });
-  });
+    .then((allEvents) => res.json(allEvents))
+    .catch((err) => {
+      console.error("Error fetching events:", err);
+      res.status(500).json({ error: 'Database fetch failed' });
+    });
+});
 
+// Start server
+app.listen(PORT, () => {
+  console.log(`✅ Server is running at http://localhost:${PORT}`);
 });
