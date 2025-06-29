@@ -59,6 +59,31 @@ app.get('/api/events', (req, res) => {
     });
 });
 
+// Update an event
+app.put('/api/events/:id', async (req, res) => {
+  try {
+    const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: "Update failed" });
+  }
+});
+
+// DELETE event by ID
+app.delete('/api/events/:id', async (req, res) => {
+  try {
+    const deleted = await Event.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json({ message: "Event deleted" });
+  } catch (err) {
+    console.error("❌ Delete error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`✅ Server is running at http://localhost:${PORT}`);

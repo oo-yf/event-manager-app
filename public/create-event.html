@@ -2,61 +2,203 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Create Event</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a New Event</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Toastify CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    :root {
+      --bg: #f0fdf4;
+      --card-bg: #f9fefb;
+      --text: #2f4f4f;
+      --input-text: #5a775a;
+      --button: #4b9963;
+      --button-hover: #3d7f52;
+      --error: #c0392b;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid #c7e4cc;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin: 1.2rem 0 0.5rem;
+    }
+
+    .form-label i {
+      margin-right: 0.5rem;
+      color: #5e9b7d;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #d4e9dc;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      color: var(--input-text);
+    }
+
+    .btn-custom {
+      width: 100%;
+      background-color: var(--button);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      background-color: var(--button-hover);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Create a New Event</h1>
-
-  <form id="eventForm">
-    <label>Event Name:
+  <div class="card">
+    <h1>Create a New Event</h1>
+    <form id="eventForm">
+      <label class="form-label"><i class="bi bi-leaf-fill"></i> Event Name</label>
       <input type="text" id="eventName" required />
-    </label><br /><br />
+      <div class="error-message" id="nameError">Please enter an event name.</div>
 
-    <label>Date:
+      <label class="form-label"><i class="bi bi-leaf-fill"></i> Date</label>
       <input type="date" id="eventDate" required />
-    </label><br /><br />
+      <div class="error-message" id="dateError">Please choose a valid future date.</div>
 
-    <label>Location:
+      <label class="form-label"><i class="bi bi-leaf-fill"></i> Location</label>
       <input type="text" id="eventLocation" required />
-    </label><br /><br />
+      <div class="error-message" id="locationError">Please enter a location.</div>
 
-    <button type="submit">Submit</button>
-  </form>
+      <label class="form-label"><i class="bi bi-image-fill"></i> Image URL (optional)</label>
+      <input type="url" id="eventImage" placeholder="https://..." />
+
+      <button type="submit" class="btn btn-custom">Submit</button>
+    </form>
+    <a href="index.html" class="back-link"><i class="bi bi-arrow-left"></i> Back to Home</a>
+  </div>
 
   <script>
-  document.getElementById("eventForm").addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent default page reload
+    // Handle form submission
+    document.getElementById("eventForm").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    // Grab form values
-    const name = document.getElementById("eventName").value;
-    const date = document.getElementById("eventDate").value;
-    const location = document.getElementById("eventLocation").value;
+      const name = document.getElementById("eventName").value.trim();
+      const date = document.getElementById("eventDate").value;
+      const location = document.getElementById("eventLocation").value.trim();
+      const imageUrl = document.getElementById("eventImage").value.trim();
 
-    // Send form data to backend via POST request
-    fetch('/api/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name, date, location })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Server response:", data);
-      alert("Event submitted and saved!");
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("Failed to save event.");
+      const nameError = document.getElementById("nameError");
+      const dateError = document.getElementById("dateError");
+      const locationError = document.getElementById("locationError");
+
+      let hasError = false;
+
+      // Clear previous errors
+      nameError.style.display = "none";
+      dateError.style.display = "none";
+      locationError.style.display = "none";
+
+      // Validation
+      if (!name) {
+        nameError.style.display = "block";
+        hasError = true;
+      }
+
+      if (!date || new Date(date) < new Date(new Date().toDateString())) {
+        dateError.style.display = "block";
+        hasError = true;
+      }
+
+      if (!location) {
+        locationError.style.display = "block";
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      // Submit to server if valid
+      fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, date, location, imageUrl})
+      })
+      .then(response => response.json())
+      .then(data => {
+        showToast("Event created 🎉");
+        setTimeout(() => {
+          window.location.href = "event-list.html";
+        }, 1200);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to save event.");
+      });
     });
-  });
-</script>
 
-<!-- Back to homepage button -->
-<br /><br />
-<a href="index.html">
-  <button>⬅️ Back to Home</button>
-</a>
-
+    function showToast(message, color = "#4b9963") {
+      Toastify({
+        text: message,
+        duration: 3000,
+        gravity: "top",
+        position: "center",
+        style: {
+          background: color,
+          borderRadius: "12px",
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+          fontFamily: "'Segoe UI', sans-serif",
+          fontSize: "0.95rem",
+          padding: "0.75rem 1.25rem",
+        },
+      }).showToast();
+    }
+  </script>
+  <!-- Toastify JS -->
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 </html>
